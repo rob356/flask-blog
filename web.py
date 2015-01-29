@@ -309,6 +309,21 @@ def recent_feed():
                  updated=post['date'])
     return feed.get_response()
 
+@app.route('/all_feed')                                                       
+def all_feed():                                                               
+    feed = AtomFeed(app.config['BLOG_TITLE'] + '::Recent Articles',              
+                    feed_url=request.url, url=request.url_root)                  
+    posts = postClass.get_posts(int(0), 0)                  
+    for post in posts['data']:                                                   
+        post_entry = post['preview'] if post['preview'] else post['body']        
+        feed.add(post['title'], md(post_entry),                                  
+                 content_type='html',                                            
+                 author=post['author'],                                          
+                 url=make_external(                                              
+                     url_for('single_post', permalink=post['permalink'])),       
+                 updated=post['date'])                                           
+    return feed.get_response()
+
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required()
@@ -453,5 +468,5 @@ if not app.config['DEBUG']:
     app.logger.addHandler(file_handler)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)),
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)),
             debug=app.config['DEBUG'])
